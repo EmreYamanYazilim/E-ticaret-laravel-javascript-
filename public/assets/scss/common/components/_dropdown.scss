@@ -1,4 +1,4 @@
-/* Dropdowns */
+// Dropdowns 
 
 .dropdown,
 .btn-group {
@@ -15,47 +15,61 @@
       vertical-align: middle;
       line-height: .625rem;
       font-size: .875rem;
-      margin-left: .3rem;
     }
   }
-  .dropdown-menu {
-    padding: .35rem;
-    margin-top: 0;
-    box-shadow: $dropdown-box-shadow; 
-    border-radius: 0;   
-    .dropdown-item {
-      font-size: .812rem;
-      padding: .25rem .875rem;
-      transition: all .2s ease-in-out;
-      border-radius: 2px;
-      i, svg {
-        color: $text-muted;
-        transition: all .2s ease-in-out;
+  &.dropup {
+    .dropdown-toggle {
+      &::after {
+        content: "\e845";
       }
-      &:hover {
-        background-color: rgba(theme-color(primary), .1);
-        &, i, svg {
-          color: theme-color(primary);
-        }        
+    }
+  }
+  &.dropstart {
+    .dropdown-toggle {
+      &::before {
+        border: 0;
+        font: normal normal normal 24px/1 "feather";
+        content: "\e843";
+        width: auto;
+        height: auto;
+        vertical-align: middle;
+        line-height: .625rem;
+        font-size: .875rem;
       }
-      &:active {
-        background: initial;
+    }
+  }
+  &.dropend {
+    .dropdown-toggle {
+      &::after {
+        content: "\e844";
       }
     }
   }
 }
 
-.rtl {
-  .dropdown,
-  .btn-group {
-    .dropdown-toggle {
-      &::after {
-        margin-left: 0;
-        margin-right: .3rem;
-      }
-    }
+.dropdown-menu {
+  padding: .35rem;
+  margin-top: 0;
+  box-shadow: $dropdown-box-shadow; 
+}
+
+.dropdown-item {
+  font-size: .812rem;
+  padding: .25rem .875rem;
+  border-radius: 2px;
+  i, svg {
+    color: $text-muted;
   }
-  .dropdown-menu {
-    text-align: right;
+  &:not(&:active, &.active):hover {
+    background-color: rgba($primary, .1);
+    &, i, svg {
+      color: $primary;
+    }        
+  }
+  &:active,
+  &.active {
+    i, svg {
+      color: $white;
+    }
   }
 }

@@ -1,84 +1,125 @@
 /**
- * Copyright (c) Tiny Technologies, Inc. All rights reserved.
- * Licensed under the LGPL or a commercial license.
- * For LGPL see License.txt in the project root for license information.
- * For commercial licenses see https://www.tiny.cloud/
- *
- * Version: 5.3.2 (2020-06-10)
+ * TinyMCE version 6.2.0 (2022-09-08)
  */
+
 (function () {
     'use strict';
 
-    var global = tinymce.util.Tools.resolve('tinymce.PluginManager');
+    var global$2 = tinymce.util.Tools.resolve('tinymce.PluginManager');
 
-    var noop = function () {
+    const hasProto = (v, constructor, predicate) => {
+      var _a;
+      if (predicate(v, constructor.prototype)) {
+        return true;
+      } else {
+        return ((_a = v.constructor) === null || _a === void 0 ? void 0 : _a.name) === constructor.name;
+      }
     };
-    var constant = function (value) {
-      return function () {
+    const typeOf = x => {
+      const t = typeof x;
+      if (x === null) {
+        return 'null';
+      } else if (t === 'object' && Array.isArray(x)) {
+        return 'array';
+      } else if (t === 'object' && hasProto(x, String, (o, proto) => proto.isPrototypeOf(o))) {
+        return 'string';
+      } else {
+        return t;
+      }
+    };
+    const isType = type => value => typeOf(value) === type;
+    const isSimpleType = type => value => typeof value === type;
+    const isString = isType('string');
+    const isObject = isType('object');
+    const isArray = isType('array');
+    const isNullable = a => a === null || a === undefined;
+    const isNonNullable = a => !isNullable(a);
+    const isFunction = isSimpleType('function');
+    const isArrayOf = (value, pred) => {
+      if (isArray(value)) {
+        for (let i = 0, len = value.length; i < len; ++i) {
+          if (!pred(value[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return false;
+    };
+
+    const constant = value => {
+      return () => {
         return value;
       };
     };
-    function curry(fn) {
-      var initialArgs = [];
-      for (var _i = 1; _i < arguments.length; _i++) {
-        initialArgs[_i - 1] = arguments[_i];
-      }
-      return function () {
-        var restArgs = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-          restArgs[_i] = arguments[_i];
-        }
-        var all = initialArgs.concat(restArgs);
+    function curry(fn, ...initialArgs) {
+      return (...restArgs) => {
+        const all = initialArgs.concat(restArgs);
         return fn.apply(null, all);
       };
     }
-    var never = constant(false);
-    var always = constant(true);
+    const never = constant(false);
+
+    const escape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     var global$1 = tinymce.util.Tools.resolve('tinymce.util.Tools');
 
-    var global$2 = tinymce.util.Tools.resolve('tinymce.util.XHR');
+    const option = name => editor => editor.options.get(name);
+    const register$2 = editor => {
+      const registerOption = editor.options.register;
+      registerOption('template_cdate_classes', {
+        processor: 'string',
+        default: 'cdate'
+      });
+      registerOption('template_mdate_classes', {
+        processor: 'string',
+        default: 'mdate'
+      });
+      registerOption('template_selected_content_classes', {
+        processor: 'string',
+        default: 'selcontent'
+      });
+      registerOption('template_preview_replace_values', { processor: 'object' });
+      registerOption('template_replace_values', { processor: 'object' });
+      registerOption('templates', {
+        processor: value => isString(value) || isArrayOf(value, isObject) || isFunction(value),
+        default: []
+      });
+      registerOption('template_cdate_format', {
+        processor: 'string',
+        default: editor.translate('%Y-%m-%d')
+      });
+      registerOption('template_mdate_format', {
+        processor: 'string',
+        default: editor.translate('%Y-%m-%d')
+      });
+    };
+    const getCreationDateClasses = option('template_cdate_classes');
+    const getModificationDateClasses = option('template_mdate_classes');
+    const getSelectedContentClasses = option('template_selected_content_classes');
+    const getPreviewReplaceValues = option('template_preview_replace_values');
+    const getTemplateReplaceValues = option('template_replace_values');
+    const getTemplates = option('templates');
+    const getCdateFormat = option('template_cdate_format');
+    const getMdateFormat = option('template_mdate_format');
+    const getContentStyle = option('content_style');
+    const shouldUseContentCssCors = option('content_css_cors');
+    const getBodyClass = option('body_class');
 
-    var getCreationDateClasses = function (editor) {
-      return editor.getParam('template_cdate_classes', 'cdate');
-    };
-    var getModificationDateClasses = function (editor) {
-      return editor.getParam('template_mdate_classes', 'mdate');
-    };
-    var getSelectedContentClasses = function (editor) {
-      return editor.getParam('template_selected_content_classes', 'selcontent');
-    };
-    var getPreviewReplaceValues = function (editor) {
-      return editor.getParam('template_preview_replace_values');
-    };
-    var getTemplateReplaceValues = function (editor) {
-      return editor.getParam('template_replace_values');
-    };
-    var getTemplates = function (editorSettings) {
-      return editorSettings.templates;
-    };
-    var getCdateFormat = function (editor) {
-      return editor.getParam('template_cdate_format', editor.translate('%Y-%m-%d'));
-    };
-    var getMdateFormat = function (editor) {
-      return editor.getParam('template_mdate_format', editor.translate('%Y-%m-%d'));
-    };
-
-    var addZeros = function (value, len) {
+    const addZeros = (value, len) => {
       value = '' + value;
       if (value.length < len) {
-        for (var i = 0; i < len - value.length; i++) {
+        for (let i = 0; i < len - value.length; i++) {
           value = '0' + value;
         }
       }
       return value;
     };
-    var getDateTime = function (editor, fmt, date) {
-      var daysShort = 'Sun Mon Tue Wed Thu Fri Sat Sun'.split(' ');
-      var daysLong = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
-      var monthsShort = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-      var monthsLong = 'January February March April May June July August September October November December'.split(' ');
-      date = date || new Date();
+    const getDateTime = (editor, fmt, date = new Date()) => {
+      const daysShort = 'Sun Mon Tue Wed Thu Fri Sat Sun'.split(' ');
+      const daysLong = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
+      const monthsShort = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+      const monthsLong = 'January February March April May June July August September October November December'.split(' ');
       fmt = fmt.replace('%D', '%m/%d/%Y');
       fmt = fmt.replace('%r', '%I:%M:%S %p');
       fmt = fmt.replace('%Y', '' + date.getFullYear());
@@ -98,18 +139,157 @@
       return fmt;
     };
 
-    var createTemplateList = function (editorSettings, callback) {
-      return function () {
-        var templateList = getTemplates(editorSettings);
-        if (typeof templateList === 'function') {
-          templateList(callback);
-          return;
+    class Optional {
+      constructor(tag, value) {
+        this.tag = tag;
+        this.value = value;
+      }
+      static some(value) {
+        return new Optional(true, value);
+      }
+      static none() {
+        return Optional.singletonNone;
+      }
+      fold(onNone, onSome) {
+        if (this.tag) {
+          return onSome(this.value);
+        } else {
+          return onNone();
         }
-        if (typeof templateList === 'string') {
-          global$2.send({
-            url: templateList,
-            success: function (text) {
-              callback(JSON.parse(text));
+      }
+      isSome() {
+        return this.tag;
+      }
+      isNone() {
+        return !this.tag;
+      }
+      map(mapper) {
+        if (this.tag) {
+          return Optional.some(mapper(this.value));
+        } else {
+          return Optional.none();
+        }
+      }
+      bind(binder) {
+        if (this.tag) {
+          return binder(this.value);
+        } else {
+          return Optional.none();
+        }
+      }
+      exists(predicate) {
+        return this.tag && predicate(this.value);
+      }
+      forall(predicate) {
+        return !this.tag || predicate(this.value);
+      }
+      filter(predicate) {
+        if (!this.tag || predicate(this.value)) {
+          return this;
+        } else {
+          return Optional.none();
+        }
+      }
+      getOr(replacement) {
+        return this.tag ? this.value : replacement;
+      }
+      or(replacement) {
+        return this.tag ? this : replacement;
+      }
+      getOrThunk(thunk) {
+        return this.tag ? this.value : thunk();
+      }
+      orThunk(thunk) {
+        return this.tag ? this : thunk();
+      }
+      getOrDie(message) {
+        if (!this.tag) {
+          throw new Error(message !== null && message !== void 0 ? message : 'Called getOrDie on None');
+        } else {
+          return this.value;
+        }
+      }
+      static from(value) {
+        return isNonNullable(value) ? Optional.some(value) : Optional.none();
+      }
+      getOrNull() {
+        return this.tag ? this.value : null;
+      }
+      getOrUndefined() {
+        return this.value;
+      }
+      each(worker) {
+        if (this.tag) {
+          worker(this.value);
+        }
+      }
+      toArray() {
+        return this.tag ? [this.value] : [];
+      }
+      toString() {
+        return this.tag ? `some(${ this.value })` : 'none()';
+      }
+    }
+    Optional.singletonNone = new Optional(false);
+
+    const exists = (xs, pred) => {
+      for (let i = 0, len = xs.length; i < len; i++) {
+        const x = xs[i];
+        if (pred(x, i)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const map = (xs, f) => {
+      const len = xs.length;
+      const r = new Array(len);
+      for (let i = 0; i < len; i++) {
+        const x = xs[i];
+        r[i] = f(x, i);
+      }
+      return r;
+    };
+    const findUntil = (xs, pred, until) => {
+      for (let i = 0, len = xs.length; i < len; i++) {
+        const x = xs[i];
+        if (pred(x, i)) {
+          return Optional.some(x);
+        } else if (until(x, i)) {
+          break;
+        }
+      }
+      return Optional.none();
+    };
+    const find = (xs, pred) => {
+      return findUntil(xs, pred, never);
+    };
+
+    const hasOwnProperty = Object.hasOwnProperty;
+    const get = (obj, key) => {
+      return has(obj, key) ? Optional.from(obj[key]) : Optional.none();
+    };
+    const has = (obj, key) => hasOwnProperty.call(obj, key);
+
+    const entitiesAttr = {
+      '"': '&quot;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      '\'': '&#039;'
+    };
+    const htmlEscape = html => html.replace(/["'<>&]/g, match => get(entitiesAttr, match).getOr(match));
+    const hasAnyClasses = (dom, n, classes) => exists(classes.split(/\s+/), c => dom.hasClass(n, c));
+
+    const createTemplateList = (editor, callback) => {
+      return () => {
+        const templateList = getTemplates(editor);
+        if (isFunction(templateList)) {
+          templateList(callback);
+        } else if (isString(templateList)) {
+          fetch(templateList).then(res => {
+            if (res.ok) {
+              res.json().then(callback);
             }
           });
         } else {
@@ -117,50 +297,45 @@
         }
       };
     };
-    var replaceTemplateValues = function (html, templateValues) {
-      global$1.each(templateValues, function (v, k) {
-        if (typeof v === 'function') {
+    const replaceTemplateValues = (html, templateValues) => {
+      global$1.each(templateValues, (v, k) => {
+        if (isFunction(v)) {
           v = v(k);
         }
-        html = html.replace(new RegExp('\\{\\$' + k + '\\}', 'g'), v);
+        html = html.replace(new RegExp('\\{\\$' + escape(k) + '\\}', 'g'), v);
       });
       return html;
     };
-    var replaceVals = function (editor, e) {
-      var dom = editor.dom, vl = getTemplateReplaceValues(editor);
-      global$1.each(dom.select('*', e), function (e) {
-        global$1.each(vl, function (v, k) {
+    const replaceVals = (editor, scope) => {
+      const dom = editor.dom, vl = getTemplateReplaceValues(editor);
+      global$1.each(dom.select('*', scope), e => {
+        global$1.each(vl, (v, k) => {
           if (dom.hasClass(e, k)) {
-            if (typeof vl[k] === 'function') {
-              vl[k](e);
+            if (isFunction(v)) {
+              v(e);
             }
           }
         });
       });
     };
-    var hasClass = function (n, c) {
-      return new RegExp('\\b' + c + '\\b', 'g').test(n.className);
-    };
-    var insertTemplate = function (editor, ui, html) {
-      var el;
-      var n;
-      var dom = editor.dom;
-      var sel = editor.selection.getContent();
+    const insertTemplate = (editor, _ui, html) => {
+      const dom = editor.dom;
+      const sel = editor.selection.getContent();
       html = replaceTemplateValues(html, getTemplateReplaceValues(editor));
-      el = dom.create('div', null, html);
-      n = dom.select('.mceTmpl', el);
+      let el = dom.create('div', {}, html);
+      const n = dom.select('.mceTmpl', el);
       if (n && n.length > 0) {
-        el = dom.create('div', null);
+        el = dom.create('div');
         el.appendChild(n[0].cloneNode(true));
       }
-      global$1.each(dom.select('*', el), function (n) {
-        if (hasClass(n, getCreationDateClasses(editor).replace(/\s+/g, '|'))) {
+      global$1.each(dom.select('*', el), n => {
+        if (hasAnyClasses(dom, n, getCreationDateClasses(editor))) {
           n.innerHTML = getDateTime(editor, getCdateFormat(editor));
         }
-        if (hasClass(n, getModificationDateClasses(editor).replace(/\s+/g, '|'))) {
+        if (hasAnyClasses(dom, n, getModificationDateClasses(editor))) {
           n.innerHTML = getDateTime(editor, getMdateFormat(editor));
         }
-        if (hasClass(n, getSelectedContentClasses(editor).replace(/\s+/g, '|'))) {
+        if (hasAnyClasses(dom, n, getSelectedContentClasses(editor))) {
           n.innerHTML = sel;
         }
       });
@@ -169,17 +344,176 @@
       editor.addVisual();
     };
 
-    var register = function (editor) {
-      editor.addCommand('mceInsertTemplate', curry(insertTemplate, editor));
+    var global = tinymce.util.Tools.resolve('tinymce.Env');
+
+    const getPreviewContent = (editor, html) => {
+      var _a;
+      if (html.indexOf('<html>') === -1) {
+        let contentCssEntries = '';
+        const contentStyle = (_a = getContentStyle(editor)) !== null && _a !== void 0 ? _a : '';
+        const cors = shouldUseContentCssCors(editor) ? ' crossorigin="anonymous"' : '';
+        global$1.each(editor.contentCSS, url => {
+          contentCssEntries += '<link type="text/css" rel="stylesheet" href="' + editor.documentBaseURI.toAbsolute(url) + '"' + cors + '>';
+        });
+        if (contentStyle) {
+          contentCssEntries += '<style type="text/css">' + contentStyle + '</style>';
+        }
+        const bodyClass = getBodyClass(editor);
+        const encode = editor.dom.encode;
+        const isMetaKeyPressed = global.os.isMacOS() || global.os.isiOS() ? 'e.metaKey' : 'e.ctrlKey && !e.altKey';
+        const preventClicksOnLinksScript = '<script>' + 'document.addEventListener && document.addEventListener("click", function(e) {' + 'for (var elm = e.target; elm; elm = elm.parentNode) {' + 'if (elm.nodeName === "A" && !(' + isMetaKeyPressed + ')) {' + 'e.preventDefault();' + '}' + '}' + '}, false);' + '</script> ';
+        const directionality = editor.getBody().dir;
+        const dirAttr = directionality ? ' dir="' + encode(directionality) + '"' : '';
+        html = '<!DOCTYPE html>' + '<html>' + '<head>' + '<base href="' + encode(editor.documentBaseURI.getURI()) + '">' + contentCssEntries + preventClicksOnLinksScript + '</head>' + '<body class="' + encode(bodyClass) + '"' + dirAttr + '>' + html + '</body>' + '</html>';
+      }
+      return replaceTemplateValues(html, getPreviewReplaceValues(editor));
+    };
+    const open = (editor, templateList) => {
+      const createTemplates = () => {
+        if (!templateList || templateList.length === 0) {
+          const message = editor.translate('No templates defined.');
+          editor.notificationManager.open({
+            text: message,
+            type: 'info'
+          });
+          return Optional.none();
+        }
+        return Optional.from(global$1.map(templateList, (template, index) => {
+          const isUrlTemplate = t => t.url !== undefined;
+          return {
+            selected: index === 0,
+            text: template.title,
+            value: {
+              url: isUrlTemplate(template) ? Optional.from(template.url) : Optional.none(),
+              content: !isUrlTemplate(template) ? Optional.from(template.content) : Optional.none(),
+              description: template.description
+            }
+          };
+        }));
+      };
+      const createSelectBoxItems = templates => map(templates, t => ({
+        text: t.text,
+        value: t.text
+      }));
+      const findTemplate = (templates, templateTitle) => find(templates, t => t.text === templateTitle);
+      const loadFailedAlert = api => {
+        editor.windowManager.alert('Could not load the specified template.', () => api.focus('template'));
+      };
+      const getTemplateContent = t => t.value.url.fold(() => Promise.resolve(t.value.content.getOr('')), url => fetch(url).then(res => res.ok ? res.text() : Promise.reject()));
+      const onChange = (templates, updateDialog) => (api, change) => {
+        if (change.name === 'template') {
+          const newTemplateTitle = api.getData().template;
+          findTemplate(templates, newTemplateTitle).each(t => {
+            api.block('Loading...');
+            getTemplateContent(t).then(previewHtml => {
+              updateDialog(api, t, previewHtml);
+            }).catch(() => {
+              updateDialog(api, t, '');
+              api.setEnabled('save', false);
+              loadFailedAlert(api);
+            });
+          });
+        }
+      };
+      const onSubmit = templates => api => {
+        const data = api.getData();
+        findTemplate(templates, data.template).each(t => {
+          getTemplateContent(t).then(previewHtml => {
+            editor.execCommand('mceInsertTemplate', false, previewHtml);
+            api.close();
+          }).catch(() => {
+            api.setEnabled('save', false);
+            loadFailedAlert(api);
+          });
+        });
+      };
+      const openDialog = templates => {
+        const selectBoxItems = createSelectBoxItems(templates);
+        const buildDialogSpec = (bodyItems, initialData) => ({
+          title: 'Insert Template',
+          size: 'large',
+          body: {
+            type: 'panel',
+            items: bodyItems
+          },
+          initialData,
+          buttons: [
+            {
+              type: 'cancel',
+              name: 'cancel',
+              text: 'Cancel'
+            },
+            {
+              type: 'submit',
+              name: 'save',
+              text: 'Save',
+              primary: true
+            }
+          ],
+          onSubmit: onSubmit(templates),
+          onChange: onChange(templates, updateDialog)
+        });
+        const updateDialog = (dialogApi, template, previewHtml) => {
+          const content = getPreviewContent(editor, previewHtml);
+          const bodyItems = [
+            {
+              type: 'selectbox',
+              name: 'template',
+              label: 'Templates',
+              items: selectBoxItems
+            },
+            {
+              type: 'htmlpanel',
+              html: `<p aria-live="polite">${ htmlEscape(template.value.description) }</p>`
+            },
+            {
+              label: 'Preview',
+              type: 'iframe',
+              name: 'preview',
+              sandboxed: false,
+              transparent: false
+            }
+          ];
+          const initialData = {
+            template: template.text,
+            preview: content
+          };
+          dialogApi.unblock();
+          dialogApi.redial(buildDialogSpec(bodyItems, initialData));
+          dialogApi.focus('template');
+        };
+        const dialogApi = editor.windowManager.open(buildDialogSpec([], {
+          template: '',
+          preview: ''
+        }));
+        dialogApi.block('Loading...');
+        getTemplateContent(templates[0]).then(previewHtml => {
+          updateDialog(dialogApi, templates[0], previewHtml);
+        }).catch(() => {
+          updateDialog(dialogApi, templates[0], '');
+          dialogApi.setEnabled('save', false);
+          loadFailedAlert(dialogApi);
+        });
+      };
+      const optTemplates = createTemplates();
+      optTemplates.each(openDialog);
     };
 
-    var setup = function (editor) {
-      editor.on('PreProcess', function (o) {
-        var dom = editor.dom, dateFormat = getMdateFormat(editor);
-        global$1.each(dom.select('div', o.node), function (e) {
+    const showDialog = editor => templates => {
+      open(editor, templates);
+    };
+    const register$1 = editor => {
+      editor.addCommand('mceInsertTemplate', curry(insertTemplate, editor));
+      editor.addCommand('mceTemplate', createTemplateList(editor, showDialog(editor)));
+    };
+
+    const setup = editor => {
+      editor.on('PreProcess', o => {
+        const dom = editor.dom, dateFormat = getMdateFormat(editor);
+        global$1.each(dom.select('div', o.node), e => {
           if (dom.hasClass(e, 'mceTmpl')) {
-            global$1.each(dom.select('*', e), function (e) {
-              if (dom.hasClass(e, editor.getParam('template_mdate_classes', 'mdate').replace(/\s+/g, '|'))) {
+            global$1.each(dom.select('*', e), e => {
+              if (hasAnyClasses(dom, e, getModificationDateClasses(editor))) {
                 e.innerHTML = getDateTime(editor, dateFormat);
               }
             });
@@ -189,367 +523,29 @@
       });
     };
 
-    var none = function () {
-      return NONE;
-    };
-    var NONE = function () {
-      var eq = function (o) {
-        return o.isNone();
-      };
-      var call = function (thunk) {
-        return thunk();
-      };
-      var id = function (n) {
-        return n;
-      };
-      var me = {
-        fold: function (n, _s) {
-          return n();
-        },
-        is: never,
-        isSome: never,
-        isNone: always,
-        getOr: id,
-        getOrThunk: call,
-        getOrDie: function (msg) {
-          throw new Error(msg || 'error: getOrDie called on none.');
-        },
-        getOrNull: constant(null),
-        getOrUndefined: constant(undefined),
-        or: id,
-        orThunk: call,
-        map: none,
-        each: noop,
-        bind: none,
-        exists: never,
-        forall: always,
-        filter: none,
-        equals: eq,
-        equals_: eq,
-        toArray: function () {
-          return [];
-        },
-        toString: constant('none()')
-      };
-      return me;
-    }();
-    var some = function (a) {
-      var constant_a = constant(a);
-      var self = function () {
-        return me;
-      };
-      var bind = function (f) {
-        return f(a);
-      };
-      var me = {
-        fold: function (n, s) {
-          return s(a);
-        },
-        is: function (v) {
-          return a === v;
-        },
-        isSome: always,
-        isNone: never,
-        getOr: constant_a,
-        getOrThunk: constant_a,
-        getOrDie: constant_a,
-        getOrNull: constant_a,
-        getOrUndefined: constant_a,
-        or: self,
-        orThunk: self,
-        map: function (f) {
-          return some(f(a));
-        },
-        each: function (f) {
-          f(a);
-        },
-        bind: bind,
-        exists: bind,
-        forall: bind,
-        filter: function (f) {
-          return f(a) ? me : NONE;
-        },
-        toArray: function () {
-          return [a];
-        },
-        toString: function () {
-          return 'some(' + a + ')';
-        },
-        equals: function (o) {
-          return o.is(a);
-        },
-        equals_: function (o, elementEq) {
-          return o.fold(never, function (b) {
-            return elementEq(a, b);
-          });
-        }
-      };
-      return me;
-    };
-    var from = function (value) {
-      return value === null || value === undefined ? NONE : some(value);
-    };
-    var Option = {
-      some: some,
-      none: none,
-      from: from
-    };
-
-    var map = function (xs, f) {
-      var len = xs.length;
-      var r = new Array(len);
-      for (var i = 0; i < len; i++) {
-        var x = xs[i];
-        r[i] = f(x, i);
-      }
-      return r;
-    };
-    var findUntil = function (xs, pred, until) {
-      for (var i = 0, len = xs.length; i < len; i++) {
-        var x = xs[i];
-        if (pred(x, i)) {
-          return Option.some(x);
-        } else if (until(x, i)) {
-          break;
-        }
-      }
-      return Option.none();
-    };
-    var find = function (xs, pred) {
-      return findUntil(xs, pred, never);
-    };
-
-    var global$3 = tinymce.util.Tools.resolve('tinymce.util.Promise');
-
-    var hasOwnProperty = Object.hasOwnProperty;
-    var get = function (obj, key) {
-      return has(obj, key) ? Option.from(obj[key]) : Option.none();
-    };
-    var has = function (obj, key) {
-      return hasOwnProperty.call(obj, key);
-    };
-
-    var entitiesAttr = {
-      '"': '&quot;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '&': '&amp;',
-      '\'': '&#039;'
-    };
-    var htmlEscape = function (html) {
-      return html.replace(/["'<>&]/g, function (match) {
-        return get(entitiesAttr, match).getOr(match);
-      });
-    };
-
-    var getPreviewContent = function (editor, html) {
-      if (html.indexOf('<html>') === -1) {
-        var contentCssLinks_1 = '';
-        global$1.each(editor.contentCSS, function (url) {
-          contentCssLinks_1 += '<link type="text/css" rel="stylesheet" href="' + editor.documentBaseURI.toAbsolute(url) + '">';
-        });
-        var bodyClass = editor.settings.body_class || '';
-        if (bodyClass.indexOf('=') !== -1) {
-          bodyClass = editor.getParam('body_class', '', 'hash');
-          bodyClass = bodyClass[editor.id] || '';
-        }
-        var encode = editor.dom.encode;
-        var directionality = editor.getBody().dir;
-        var dirAttr = directionality ? ' dir="' + encode(directionality) + '"' : '';
-        html = '<!DOCTYPE html>' + '<html>' + '<head>' + contentCssLinks_1 + '</head>' + '<body class="' + encode(bodyClass) + '"' + dirAttr + '>' + html + '</body>' + '</html>';
-      }
-      return replaceTemplateValues(html, getPreviewReplaceValues(editor));
-    };
-    var open = function (editor, templateList) {
-      var createTemplates = function () {
-        if (!templateList || templateList.length === 0) {
-          var message = editor.translate('No templates defined.');
-          editor.notificationManager.open({
-            text: message,
-            type: 'info'
-          });
-          return Option.none();
-        }
-        return Option.from(global$1.map(templateList, function (template, index) {
-          var isUrlTemplate = function (t) {
-            return t.url !== undefined;
-          };
-          return {
-            selected: index === 0,
-            text: template.title,
-            value: {
-              url: isUrlTemplate(template) ? Option.from(template.url) : Option.none(),
-              content: !isUrlTemplate(template) ? Option.from(template.content) : Option.none(),
-              description: template.description
-            }
-          };
-        }));
-      };
-      var createSelectBoxItems = function (templates) {
-        return map(templates, function (t) {
-          return {
-            text: t.text,
-            value: t.text
-          };
-        });
-      };
-      var findTemplate = function (templates, templateTitle) {
-        return find(templates, function (t) {
-          return t.text === templateTitle;
-        });
-      };
-      var loadFailedAlert = function (api) {
-        editor.windowManager.alert('Could not load the specified template.', function () {
-          return api.focus('template');
-        });
-      };
-      var getTemplateContent = function (t) {
-        return new global$3(function (resolve, reject) {
-          t.value.url.fold(function () {
-            return resolve(t.value.content.getOr(''));
-          }, function (url) {
-            return global$2.send({
-              url: url,
-              success: function (html) {
-                resolve(html);
-              },
-              error: function (e) {
-                reject(e);
-              }
-            });
-          });
-        });
-      };
-      var onChange = function (templates, updateDialog) {
-        return function (api, change) {
-          if (change.name === 'template') {
-            var newTemplateTitle = api.getData().template;
-            findTemplate(templates, newTemplateTitle).each(function (t) {
-              api.block('Loading...');
-              getTemplateContent(t).then(function (previewHtml) {
-                updateDialog(api, t, previewHtml);
-              }).catch(function () {
-                updateDialog(api, t, '');
-                api.disable('save');
-                loadFailedAlert(api);
-              });
-            });
-          }
-        };
-      };
-      var onSubmit = function (templates) {
-        return function (api) {
-          var data = api.getData();
-          findTemplate(templates, data.template).each(function (t) {
-            getTemplateContent(t).then(function (previewHtml) {
-              insertTemplate(editor, false, previewHtml);
-              api.close();
-            }).catch(function () {
-              api.disable('save');
-              loadFailedAlert(api);
-            });
-          });
-        };
-      };
-      var openDialog = function (templates) {
-        var selectBoxItems = createSelectBoxItems(templates);
-        var buildDialogSpec = function (bodyItems, initialData) {
-          return {
-            title: 'Insert Template',
-            size: 'large',
-            body: {
-              type: 'panel',
-              items: bodyItems
-            },
-            initialData: initialData,
-            buttons: [
-              {
-                type: 'cancel',
-                name: 'cancel',
-                text: 'Cancel'
-              },
-              {
-                type: 'submit',
-                name: 'save',
-                text: 'Save',
-                primary: true
-              }
-            ],
-            onSubmit: onSubmit(templates),
-            onChange: onChange(templates, updateDialog)
-          };
-        };
-        var updateDialog = function (dialogApi, template, previewHtml) {
-          var content = getPreviewContent(editor, previewHtml);
-          var bodyItems = [
-            {
-              type: 'selectbox',
-              name: 'template',
-              label: 'Templates',
-              items: selectBoxItems
-            },
-            {
-              type: 'htmlpanel',
-              html: '<p aria-live="polite">' + htmlEscape(template.value.description) + '</p>'
-            },
-            {
-              label: 'Preview',
-              type: 'iframe',
-              name: 'preview',
-              sandboxed: false
-            }
-          ];
-          var initialData = {
-            template: template.text,
-            preview: content
-          };
-          dialogApi.unblock();
-          dialogApi.redial(buildDialogSpec(bodyItems, initialData));
-          dialogApi.focus('template');
-        };
-        var dialogApi = editor.windowManager.open(buildDialogSpec([], {
-          template: '',
-          preview: ''
-        }));
-        dialogApi.block('Loading...');
-        getTemplateContent(templates[0]).then(function (previewHtml) {
-          updateDialog(dialogApi, templates[0], previewHtml);
-        }).catch(function () {
-          updateDialog(dialogApi, templates[0], '');
-          dialogApi.disable('save');
-          loadFailedAlert(dialogApi);
-        });
-      };
-      var optTemplates = createTemplates();
-      optTemplates.each(openDialog);
-    };
-
-    var showDialog = function (editor) {
-      return function (templates) {
-        open(editor, templates);
-      };
-    };
-    var register$1 = function (editor) {
+    const register = editor => {
+      const onAction = () => editor.execCommand('mceTemplate');
       editor.ui.registry.addButton('template', {
         icon: 'template',
         tooltip: 'Insert template',
-        onAction: createTemplateList(editor.settings, showDialog(editor))
+        onAction
       });
       editor.ui.registry.addMenuItem('template', {
         icon: 'template',
         text: 'Insert template...',
-        onAction: createTemplateList(editor.settings, showDialog(editor))
+        onAction
       });
     };
 
-    function Plugin () {
-      global.add('template', function (editor) {
-        register$1(editor);
+    var Plugin = () => {
+      global$2.add('template', editor => {
+        register$2(editor);
         register(editor);
+        register$1(editor);
         setup(editor);
       });
-    }
+    };
 
     Plugin();
 
-}());
+})();

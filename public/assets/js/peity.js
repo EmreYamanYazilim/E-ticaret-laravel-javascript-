@@ -1,3 +1,6 @@
+// npm package: peity
+// github link: https://github.com/benpickles/peity
+
 $(function() {
   'use strict'
 

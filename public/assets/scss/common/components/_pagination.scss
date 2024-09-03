@@ -1,13 +1,9 @@
 .pagination {
   .page-item {
     .page-link {
-      min-width: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       svg {
-        width: 17px;
-        height: 17px;
+        width: 18px;
+        height: 18px;
       }
     }
   }
@@ -21,38 +17,14 @@
       &:last-child  {
         margin-right: 0;
       }
-      .page-link {
-        @include border-radius(2px);
-      }
     }
   }
   &.pagination-rounded {
     .page-item {
-      margin-right: 3px;
-      margin-left: 3px;
+      margin-right: 2px;
+      margin-left: 2px;
       .page-link {
         @include border-radius(50px);
-      }
-    }
-  }
-}
-
-.rtl {
-  .pagination {
-    .page-item {
-      &:first-child {
-        .page-link {
-          margin-left: 0;
-          @include border-left-radius(0);
-          @include border-right-radius($border-radius);
-        }
-      }
-      &:last-child {
-        .page-link {
-          margin-left: 0;
-          @include border-right-radius(0);
-          @include border-left-radius($border-radius);
-        }
       }
     }
   }

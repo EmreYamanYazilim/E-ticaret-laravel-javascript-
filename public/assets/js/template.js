@@ -12,47 +12,59 @@
     // Enable feather-icons with SVG markup
     feather.replace();
 
-    // initializing bootstrap tooltip
-    $('[data-toggle="tooltip"]').tooltip();
 
     // initialize clipboard plugin
     if ($('.btn-clipboard').length) {
+      // Enabling tooltip to all clipboard buttons
+      $('.btn-clipboard').attr('data-bs-toggle', 'tooltip').attr('title', 'Copy to clipboard');
+
       var clipboard = new ClipboardJS('.btn-clipboard');
 
-      // Enabling tooltip to all clipboard buttons
-      $('.btn-clipboard').attr('data-toggle', 'tooltip').attr('title', 'Copy to clipboard');
-
-      // initializing bootstrap tooltip
-      $('[data-toggle="tooltip"]').tooltip();
-
-      // initially hide btn-clipboard and show after copy
       clipboard.on('success', function(e) {
-        e.trigger.classList.value = 'btn btn-clipboard btn-current'
-        $('.btn-current').tooltip('hide');
-        e.trigger.dataset.originalTitle = 'Copied';
-        $('.btn-current').tooltip('show');
-        setTimeout(function(){
-            $('.btn-current').tooltip('hide');
-            e.trigger.dataset.originalTitle = 'Copy to clipboard';
-            e.trigger.classList.value = 'btn btn-clipboard'
-        },1000);
-        e.clearSelection();
+        console.log(e);
+        e.trigger.innerHTML = 'copied';
+        setTimeout(function() {
+          e.trigger.innerHTML = 'copy';
+          e.clearSelection();
+        },700)
       });
     }
+
+
+    // initializing bootstrap tooltip
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+
+    // initializing bootstrap popover
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+      return new bootstrap.Popover(popoverTriggerEl)
+    })
 
 
     // Applying perfect-scrollbar 
     if ($('.sidebar .sidebar-body').length) {
       const sidebarBodyScroll = new PerfectScrollbar('.sidebar-body');
     }
-    if ($('.content-nav-wrapper').length) {
-      const contentNavWrapper = new PerfectScrollbar('.content-nav-wrapper');
-    }
+    // commented beacuse of hang (scroll from  dropdown.html with small height)
+    // if ($('.content-nav-wrapper').length) {
+    //   const contentNavWrapper = new PerfectScrollbar('.content-nav-wrapper');
+    // }
+
+
+    // Close other submenu in sidebar on opening any
+    sidebar.on('show.bs.collapse', '.collapse', function() {
+      sidebar.find('.collapse.show').collapse('hide');
+    });
+
 
     // Sidebar toggle to sidebar-folded
     $('.sidebar-toggler').on('click', function(e) {
-      $(this).toggleClass('active');
-      $(this).toggleClass('not-active');
+      e.preventDefault();
+      $('.sidebar-header .sidebar-toggler').toggleClass('active not-active');
       if (window.matchMedia('(min-width: 992px)').matches) {
         e.preventDefault();
         body.toggleClass('sidebar-folded');
@@ -63,10 +75,25 @@
     });
 
 
+    // commmented because of apex chart width issue in desktop (in lg not in xl)
+    // // sidebar-folded on large devices
+    // function iconSidebar(e) {
+    //   if (e.matches) {
+    //     body.addClass('sidebar-folded');
+    //   } else {
+    //     body.removeClass('sidebar-folded');
+    //   }
+    // }
+    // var desktopMedium = window.matchMedia('(min-width:992px) and (max-width: 1199px)');
+    // desktopMedium.addListener(iconSidebar);
+    // iconSidebar(desktopMedium);
+
+
     // Settings sidebar toggle
     $('.settings-sidebar-toggler').on('click', function(e) {
       $('body').toggleClass('settings-open');
     });
+
 
     // Sidebar theme settings
     $("input:radio[name=sidebarThemeSettings]").click(function() {
@@ -74,18 +101,6 @@
       $('body').addClass($(this).val());
      })
 
-
-    // sidebar-folded on large devices
-    function iconSidebar(e) {
-      if (e.matches) {
-        body.addClass('sidebar-folded');
-      } else {
-        body.removeClass('sidebar-folded');
-      }
-    }
-    var desktopMedium = window.matchMedia('(min-width:992px) and (max-width: 1199px)');
-    desktopMedium.addListener(iconSidebar);
-    iconSidebar(desktopMedium);
 
 
     //Add active class to nav-link based on url dynamically
@@ -139,7 +154,8 @@
       }
     });
 
-  // close sidebar when click outside on mobile/table    
+
+    // close sidebar when click outside on mobile/table    
     $(document).on('click touchstart', function(e){
       e.stopPropagation();
 
@@ -154,14 +170,6 @@
         }
       }
     });
-
-    // initializing popover
-    $('[data-toggle="popover"]').popover();
-
-    //checkbox and radios
-    $(".form-check label,.form-radio label").append('<i class="input-frame"></i>');
-
-
 
 
     //Horizontal menu in mobile
@@ -191,6 +199,13 @@
     });
 
 
+    // Prevent body scrolling while sidebar scroll
+    $('.sidebar .sidebar-body').hover(function () {
+      $('body').addClass('overflow-hidden');
+    }, function () {
+      $('body').removeClass('overflow-hidden');
+    });
+   
 
   });
 })(jQuery);

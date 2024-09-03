@@ -1,3 +1,6 @@
+// npm package: cropperjs
+// github link: https://github.com/fengyuanchen/cropperjs
+
 $(function() {
   'use strict';
 
@@ -9,27 +12,31 @@ $(function() {
   upload = document.querySelector('#cropperImageUpload'),
   cropper = '';
 
-  $('.file-upload-browse').on('click', function(e) {
-    var file = $(this).parent().parent().parent().find('.file-upload-default');
-    file.trigger('click');
+  cropper = new Cropper(croppingImage, {
+    zoomable: false
   });
-
-  cropper = new Cropper(croppingImage);
 
   // on change show image with crop options
   upload.addEventListener('change', function (e) {
-    $(this).parent().find('.form-control').val($(this).val().replace(/C:\\fakepath\\/i, ''));    
     if (e.target.files.length) {
-      cropper.destroy();
-      // start file reader
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        if(e.target.result){
-          croppingImage.src = e.target.result;
-          cropper = new Cropper(croppingImage);
-        }
-      };
-      reader.readAsDataURL(e.target.files[0]);
+      console.log(e.target.files[0]);
+      var fileType = e.target.files[0].type;
+      if(fileType === 'image/gif' || fileType === 'image/jpeg' || fileType === 'image/png') {
+        cropper.destroy();
+        // start file reader
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          if(e.target.result){
+            croppingImage.src = e.target.result;
+            cropper = new Cropper(croppingImage, {
+              zoomable: false
+            });
+          }
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      } else {
+        alert("Selected file type is not supported. Please try again")
+      }
     }
   });
 
