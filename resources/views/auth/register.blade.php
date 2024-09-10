@@ -11,6 +11,7 @@
             <a href="#" class="noble-ui-logo d-block mb-2">EmreYamanYazılım<span>EYY</span></a>
             <h5 class="text-muted fw-normal mb-4">Ücretsiz bir hesap oluşturun.</h5>
             <form class="forms-sample" {{ route("register") }} method="POST" id="registerForm">
+                @csrf
                 <div class="mb-3">
                     <label for="name" class="form-label">Kullanıcı Adı</label>
                     <input type="text" class="form-control" id="name" name="name" placeholder="Ad Soyad">
