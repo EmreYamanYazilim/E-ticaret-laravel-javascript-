@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
+use App\Events\UserRegisterEvent;
+use App\Listeners\UserRegisterListener;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $listen = [
+        UserRegisterEvent::class => [
+            UserRegisterListener::class
+        ]
+    ];
     /**
      * Register any application services.
      */
@@ -24,17 +29,5 @@ class AppServiceProvider extends ServiceProvider
     {
         //migrate hatasını gidermek için
         Schema::defaultStringLength(191);
-        // Register limitlendirme
-        RateLimiter::for('registiration', function ($job) {
-            return Limit::perHour(5)->by($job->ip());
-        });
-        // Login Limitlendirme
-        RateLimiter::for('login', function ($job) {
-            return Limit::perHour(10)->by($job->ip());
-        });
-        // Yüksek Trafiği olan sayfaları Limitlendirme
-        RateLimiter::for('high-traffic', function ($job) {
-            return Limit::perMinute(10)->by($job->ip());
-        });
     }
 }

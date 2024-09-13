@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Hash;
+use App\Events\UserRegisterEvent;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use Illuminate\Support\Facades\Cache;
 
 class RegisterController extends Controller
 {
@@ -18,18 +19,28 @@ class RegisterController extends Controller
     //RegisterRequest  olarak özel request'te hazırladım ama ben backend tarafından değil  frontendt tarafından gelen uyarıları yaptığım yoldan devam edeceğim
     public function register(RegisterRequest $request)
     {
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            // 'password' => Hash::make($request->password),
-        ];
-        // only ile yanlızca o fieldleri alabileceği anlamına gelir
+
         $data = $request->only('name', 'email', 'password');
-        //execpt Hariç tut alttaki gibi password haricinde tüm verileri tutmaya yaarar
-        $data = $request->except('password');
-        dd($data);
-        return User::create($data);
+
+        $user = User::create(attributes: $data);
+        event(new UserRegisterEvent($user));
+        dd("Event Çalıştı");
 
     }
+
+    public function verify(Request $request)
+    {
+        $userID = Cache::get('verify_token_' . $request->token);
+
+        if (!$userID) {
+            dd('user yok');
+        }
+        $user = User::findOrFail($userID);
+        $user->email_verified_at = now();
+        $user->save();
+        //gelen tokeni silme işlemi
+        Cache::forget('verify_token_' . $request->token);
+        dd('E-posta doğrulama başarılı');
+    }
+
 }

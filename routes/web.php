@@ -20,12 +20,14 @@ Route::get('/siparislerim', [MyOrdersController::class, 'index']);
 Route::get('/siperislerim-detay', [MyOrdersController::class, 'detail']);
 
 //throttle yaparak provider içinde registiration oluşturduğumuz limitleri verebiliriz daha fazla özelleştirme için bu yöntem  basit  olaratak  alttaki yöntemi kullanacağım
-Route::middleware('throttle:registiration')->group(function () {
-    Route::get('kayit-ol', [RegisterController::class, 'showForm']);
+Route::middleware('throttle:registration')->group(function () {
+    Route::get('kayit-ol', [RegisterController::class, 'showForm'])->name("register");
     Route::post('kayit-ol', [RegisterController::class, 'register']);
 });
+
+Route::get('/dogrula/{token}', [RegisterController::class, 'verify'])->name('verify');
 // throttle alternatif yöntemde throttle:60,1  dakikada 60 istek atılabiliceğini belirtir
-Route::get('giris', [LoginController::class, 'showForm'])->name('login')->middleware('throttle:60,60');
+Route::get('giris', [LoginController::class, 'showForm'])->name('login')->middleware("throttle:60,60");
 Route::post('giris', [LoginController::class, 'login']);
 
 Route::prefix('admin')->group(function () {

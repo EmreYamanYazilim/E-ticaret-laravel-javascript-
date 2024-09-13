@@ -7,10 +7,8 @@
                 <li><a href=" " class="text-white">SİPARİŞLERİM</a></li>
                 <li><a href="" class="text-white">SEPETİM</a></li>
                 <li class="dropdown user-basket position-relative">
-                    <a href="javascript:void(0)" class="dropdown-toggle position-relative"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
+                    <a href="javascript:void(0)" class="dropdown-toggle position-relative" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-cart zoom text-white fs-4"></i>
                         <span class="item-count bg-orange text-black">13</span>
                     </a>
@@ -20,7 +18,8 @@
                                 <div class="card border-0">
                                     <div class="row">
                                         <div class="col-4">
-                                            <img src="assets/images/shopping.webp" alt="" class="img-fluid rounded-start">
+                                            <img src="assets/images/shopping.webp" alt=""
+                                                class="img-fluid rounded-start">
                                         </div>
                                         <div class="col-8">
                                             <div class="card-body">
@@ -42,7 +41,8 @@
                                 <div class="card border-0">
                                     <div class="row">
                                         <div class="col-4">
-                                            <img src="assets/images/shopping.webp" alt="" class="img-fluid rounded-start">
+                                            <img src="assets/images/shopping.webp" alt=""
+                                                class="img-fluid rounded-start">
                                         </div>
                                         <div class="col-8">
                                             <div class="card-body">
@@ -64,7 +64,8 @@
                                 <div class="card border-0">
                                     <div class="row">
                                         <div class="col-4">
-                                            <img src="assets/images/shopping.webp" alt="" class="img-fluid rounded-start">
+                                            <img src="assets/images/shopping.webp" alt=""
+                                                class="img-fluid rounded-start">
                                         </div>
                                         <div class="col-8">
                                             <div class="card-body">
