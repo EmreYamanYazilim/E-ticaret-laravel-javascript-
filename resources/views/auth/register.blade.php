@@ -1,24 +1,43 @@
-@extends("layouts.auth")
+@extends('layouts.auth')
 
-@section("title", "Kayıt Ol")
+@section('title', 'Kayıt Ol')
 
-@push("css")
+@push('css')
 @endpush
 
-@section("body")
+@section('body')
     <div class="col-md-8 ps-md-0">
         <div class="auth-form-wrapper px-4 py-5">
             <a href="#" class="noble-ui-logo d-block mb-2">EmreYamanYazılım<span>EYY</span></a>
             <h5 class="text-muted fw-normal mb-4">Ücretsiz bir hesap oluşturun.</h5>
-            <form class="forms-sample" {{ route("register") }} method="POST" id="registerForm">
+            <form class="forms-sample" {{ route('register') }} method="POST" id="registerForm">
                 @csrf
+                {{-- backend tarafından  RegisterRequest ile ilettiğim hatalr ben frontendtten devam edicem --}}
+
+                {{-- <div class="alert alert-danger">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div> --}}
                 <div class="mb-3">
                     <label for="name" class="form-label">Kullanıcı Adı</label>
-                    <input type="text" class="form-control" id="name" name="name" placeholder="Ad Soyad">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Ad Soyad"
+                        value="{{ old('name') }}">
+                    {{-- yukarıda toplu şekilde hataları verdim ama özel olarak altında backendten gelen hatalrı vermeke istersek tek tek belirterek böyle verebiliyoruz --}}
+                    @error('name')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">E-mail </label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="E-mail Adresi">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="E-mail Adresi"
+                        value="{{ old('email') }}">
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Şifre</label>
@@ -44,12 +63,12 @@
                         Google ile giriş yap
                     </button>
                 </div>
-                <a href="{{ route("login") }}" class="d-block mt-3 text-muted">Zaten bir kullanıcı mısınız? Giriş yapın</a>
+                <a href="{{ route('login') }}" class="d-block mt-3 text-muted">Zaten bir kullanıcı mısınız? Giriş yapın</a>
             </form>
         </div>
     </div>
 @endsection
 
-@push("js")
-    <script src="{{ asset("assets/js/auth/register.js") }}"></script>
+@push('js')
+    <script src="{{ asset('assets/js/auth/register.js') }}"></script>
 @endpush
