@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Notifications\WelcomeMailNotification;
 use Illuminate\Support\Str;
 use App\Mail\UserWelcomeMail;
 use App\Events\UserRegisterEvent;
@@ -29,7 +30,15 @@ class UserRegisterListener
 
         // Ön bellekte  60 dk boyunca tokeni saklayacak
         Cache::put('verify_token_' . $token, $event->user->id, 3600);
-        Mail::to($event->user->email)->send(new UserWelcomeMail($event->user, $token));
-        dd($event->user);
+
+
+
+        // observe işlemleri için artık event fırlatmıyoruz oyüzden yorum satırına alıyorum listener ve notification işlemeri için eventimizi kenarda tutuyorum
+        //notification ile email işlemleri
+        // $event->user->notify(new WelcomeMailNotification($token));
+
+        //aynı işlemi notification ile işlemi yapacağım için bunu yorum satırına aldım
+        // Mail::to($event->user->email)->send(new UserWelcomeMail($event->user, $token));
+
     }
 }
