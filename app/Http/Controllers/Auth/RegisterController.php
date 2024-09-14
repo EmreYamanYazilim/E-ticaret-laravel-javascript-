@@ -42,9 +42,15 @@ class RegisterController extends Controller
             alert()->warning('Uyarı', 'Tokenin geçerlilik süresi dolmuş');
             return redirect()->route('register');
         }
-        $user = User::findOrFail($userID);
-        $user->email_verified_at = now();
-        $user->save();
+        // $user = User::findOrFail($userID);
+        // $user->email_verified_at = now();
+        // $user->save();
+
+        $userQuery = User::query()
+            ->where('id', $userID);
+        $user = $userQuery->firstOrFail();
+        $userQuery->update(['email_verified_at' => now()]);
+
         //gelen tokeni silme işlemi
         Cache::forget('verify_token_' . $request->token);
 
