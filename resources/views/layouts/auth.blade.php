@@ -48,6 +48,7 @@
     <script src="{{ asset('assets/vendors/core/core.js') }}"></script>
     <script src="{{ asset('assets/js/template.js') }}"></script>
     <script src="{{ asset('assets/vendors/sweetalert2/sweetalert2.min.js') }}"></script>
+    @include('sweetalert::alert')
     @stack('js')
 </body>
 

@@ -30,6 +30,6 @@ Route::get('/dogrula/{token}', [RegisterController::class, 'verify'])->name('ver
 Route::get('giris', [LoginController::class, 'showForm'])->name('login')->middleware("throttle:60,60");
 Route::post('giris', [LoginController::class, 'login']);
 
-Route::prefix('admin')->group(function () {
-    Route::get('/', [DashboardController::class, 'index']);
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.index');
 });
