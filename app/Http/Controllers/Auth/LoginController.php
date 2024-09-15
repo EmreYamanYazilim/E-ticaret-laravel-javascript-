@@ -11,4 +11,10 @@ class LoginController extends Controller
     {
         return view('auth.login');
     }
+
+    public function login(Request $request)
+    {
+        // $request->only('email', 'password');
+        dd($request->all());
+    }
 }

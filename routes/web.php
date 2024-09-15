@@ -27,9 +27,11 @@ Route::middleware('throttle:registration')->group(function () {
 
 Route::get('/dogrula/{token}', [RegisterController::class, 'verify'])->name('verify');
 // throttle alternatif yöntemde throttle:60,1  dakikada 60 istek atılabiliceğini belirtir
-Route::get('giris', [LoginController::class, 'showForm'])->name('login')->middleware("throttle:60,60");
-Route::post('giris', [LoginController::class, 'login']);
 
+Route::prefix('giris')->middleware('throttle:60,60')->group(function () {
+    Route::get('/', [LoginController::class, 'showForm'])->name('login');
+    Route::post('/', [LoginController::class, 'login']);
+});
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 });
