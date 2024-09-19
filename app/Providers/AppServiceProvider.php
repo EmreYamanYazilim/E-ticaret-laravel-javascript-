@@ -28,6 +28,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //migrate hatasını gidermek için
-        Schema::defaultStringLength(191);
+        Schema::defaultStringLength(length: 191);
     }
 }

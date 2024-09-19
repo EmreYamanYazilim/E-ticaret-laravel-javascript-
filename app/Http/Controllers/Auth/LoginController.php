@@ -28,7 +28,16 @@ class LoginController extends Controller
             }
 
         }
-        return redirect()->intended('/admin');
+
+            // deneme olarak hasRole yapıyorum sonra middleware yaparak düzenleyeceğim
+            if ($user->hasRole(['super-admin', 'category-manager','product-manager', 'order-manager', 'user-manager']))
+            {
+            return redirect()->route('admin.index');
+            }
+            return redirect()->route('order.index');
+
+
+            return redirect()->intended('/admin');
     }
 
     public function logout()
