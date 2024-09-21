@@ -16,6 +16,11 @@
                     <label for="email" class="form-label">E-mail </label>
                     <input type="email" class="form-control" name="email" id="email"
                         placeholder="E-mail Adresinizi Girin" value="{{ old('email') }}">
+                        @error('email')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Şifre</label>

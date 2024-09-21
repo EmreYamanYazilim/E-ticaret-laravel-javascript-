@@ -49,14 +49,20 @@ class RegisterController extends Controller
         $userQuery = User::query()
             ->where('id', $userID);
         $user = $userQuery->firstOrFail();
-        $userQuery->update(['email_verified_at' => now()]);
+        $user->email_verified_at = now();
+        $user->save();
+        // $userQuery->update(['email_verified_at' => now()]);
 
         //gelen tokeni silme işlemi
-        Cache::forget('verify_token_' . $request->token);
+        // Cache::forget('verify_token_' . $request->token);
 
         Auth::login($user);
         alert()->success('Başarılı', 'Hesabınız oynaylandı');
-        return redirect()->route('admin.index');
+        if ($user->hasRole(['super-admin', 'category-manager','product-manager', 'order-manager', 'user-manager']))
+        {
+            return redirect()->route('admin.index');
+        }
+        return redirect()->route('index');
     }
 
 }

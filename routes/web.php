@@ -19,7 +19,7 @@ Route::get('/odeme', [CheckoutController::class, 'index']);
 Route::get('/siparislerim', [MyOrdersController::class, 'index'])->name('order.index');
 Route::get('/siperislerim-detay', [MyOrdersController::class, 'detail'])->name('order.detail');
 
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth','admin-check'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
 });
 /* Auth işlemleri*/
