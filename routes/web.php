@@ -34,5 +34,8 @@ Route::prefix('giris')->middleware('throttle:60,60')->group(function () {
     Route::get('/', [LoginController::class, 'showForm'])->name('login');
     Route::post('/', [LoginController::class, 'login']);
 });
+Route::get('auth/{driver}/callback', [LoginController::class, 'socialiteVerify'])->name('login.socialite-verify');
+Route::get('auth/{driver}', [LoginController::class, 'socialite'])->name('login.socialite');
+
 Route::post('/cikis', [LoginController::class, 'logout'])->name('logout');
 Route::get('/dogrula/{token}', [RegisterController::class, 'verify'])->name('verify');

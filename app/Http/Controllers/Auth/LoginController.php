@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -48,4 +50,32 @@ class LoginController extends Controller
         Auth::logout();
         return redirect()->route('index');
     }
+
+    public function socialite($driver)
+    {
+       return Socialite::driver($driver)->redirect();
+    }
+
+    public function socialiteVerify($driver)
+    {
+        $user = Socialite::driver($driver)->user();
+
+        $checkUser = User::query()->where('email',$user->getEmail())->first();
+
+        if ($checkUser) {
+            Auth::login(user: $checkUser);
+            return redirect()->route('index');
+        }
+
+        $createUser = User::create([
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'password' => bcrypt('Asdasd123!'),// parola sıfırlama gelince bu bölüm değişecek
+            'email_verified_at' => now()
+        ]);
+
+        Auth::login($createUser);
+        return redirect()->route('index');
+    }
+
 }
