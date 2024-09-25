@@ -3,8 +3,9 @@
 namespace App\Providers;
 
 use App\Events\UserRegisterEvent;
-use App\Listeners\UserRegisterListener;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
+use App\Listeners\UserRegisterListener;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,5 +30,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //migrate hatasını gidermek için
         Schema::defaultStringLength(length: 191);
+        Paginator::useBootstrapFive();
     }
 }

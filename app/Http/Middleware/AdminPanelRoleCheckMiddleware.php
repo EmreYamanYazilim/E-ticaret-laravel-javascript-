@@ -20,7 +20,6 @@ class AdminPanelRoleCheckMiddleware
         $authUser = Auth::user();
         if ($authUser->hasRole(['super-admin', 'category-manager','product-manager', 'order-manager', 'user-manager']))
         {
-            dd('Geldi');
             return $next($request);
         }
         return redirect()->route('index');

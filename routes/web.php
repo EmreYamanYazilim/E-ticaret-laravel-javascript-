@@ -9,7 +9,7 @@ use App\Http\Controllers\Front\MyOrdersController;
 use App\Http\Controllers\Front\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-
+use App\Http\Controllers\CategoryController;
 
 Route::get('/', [FrontController::class, 'index'])->name('index');
 Route::get('/urun-listesi', [ProductController::class, 'list']);
@@ -21,6 +21,7 @@ Route::get('/siperislerim-detay', [MyOrdersController::class, 'detail'])->name('
 
 Route::prefix('admin')->name('admin.')->middleware(['auth','admin-check'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
+    Route::resource('category', CategoryController::class);
 });
 /* Auth işlemleri*/
 
