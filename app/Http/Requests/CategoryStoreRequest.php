@@ -23,10 +23,10 @@ class CategoryStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string','min:2', 'max:125'],
+            'name'              => ['required', 'string','min:2', 'max:125'],
             'short_description' => ['sometimes', 'nullable', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'max:255'],
-            'slug' => ['sometimes', 'nullable', 'max:255','unique:categories,slug'],
+            'description'       => ['sometimes', 'nullable', 'max:255'],
+            'slug'              => ['sometimes', 'nullable', 'max:255','unique:categories,slug'],
         ];
     }
 
