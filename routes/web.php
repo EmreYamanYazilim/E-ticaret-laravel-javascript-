@@ -22,6 +22,7 @@ Route::get('/siperislerim-detay', [MyOrdersController::class, 'detail'])->name('
 Route::prefix('admin')->name('admin.')->middleware(['auth','admin-check'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::resource('category', CategoryController::class);
+    Route::post('category/change-status',[CategoryController::class, 'changeStatus'])->name('category.change-status');
 });
 /* Auth işlemleri*/
 

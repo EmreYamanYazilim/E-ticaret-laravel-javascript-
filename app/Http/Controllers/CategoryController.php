@@ -117,4 +117,32 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->back();
     }
+
+    public function changeStatus(Request $request)
+    {
+        $id = $request->id;
+        $category = Category::query()->where('id',$id)->first();
+        if (is_null($category))
+        {
+        //json direk içinde verebiliriz  ben haric ve zincirleme olarak yapacağım
+            return response()
+                ->json()
+                ->setData(['message' => 'Kategori bulunamadı'])
+                ->setStatusCode(404)
+                ->setCharset('utf-8')
+                ->header('Content-Type', 'application/json')
+                ->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+        }
+
+        $category->status = !$category->status;
+        $category->save();
+
+        return response()
+        ->json()
+        ->setData($category)
+        ->setStatusCode(200)
+        ->setCharset('utf-8')
+        ->header('Content-Type', 'application/json')
+        ->setEncodingOptions(JSON_UNESCAPED_UNICODE);
+    }
 }
