@@ -59,14 +59,45 @@
 
 @push('js')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let deleteForm = document.querySelector('#deleteForm');
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     let deleteForm = document.querySelector('#deleteForm');
 
-            document.querySelector('.table').addEventListener('click', function(event) {
-                let element = event.target;
-                let categoryName = element.getAttribute('data-name');
-                if (element.classList.contains('btn-delete-category')) {
+        //     document.querySelector('.table').addEventListener('click', function(event) {
+        //         let element = event.target;
+        //         let categoryName = element.getAttribute('data-name');
+        //         if (element.classList.contains('btn-delete-category')) {
 
+        //             Swal.fire({
+        //                 title: categoryName + " Kategorisini silmek istediğinize emin misiniz?",
+        //                 showCancelButton: true,
+        //                 confirmButtonText: "Evet",
+        //                 cancelButtonText: "Hayır"
+        //             }).then((result) => {
+        //                 if (result.isConfirmed) {
+        //                     let dataID = element.getAttribute('data-id');
+        //                     //rotanın her zaman ne olduğunu bulabilmek için değişkene veriyorum
+        //                     let route ='{{ route('admin.category.destroy', ['category' => 'eyy_cat']) }}'
+        //                     route = route.replace('eyy_cat', dataID)
+        //                     deleteForm.action = route;
+        //                     setTimeout(deleteForm.submit(), 100);
+        //                     Swal.fire("Silindi", "", "success");
+        //                 } else if (result.isDenied) {
+        //                     Swal.fire("Kategori silinmedi", "", "info");
+        //                 }
+        //             });
+
+        //         }
+        //     });
+        // });
+
+        $(document).ready(function() {
+            let deleteForm = $('#deleteForm');
+
+            $('.table').on('click', function(event) {
+                let element = $(event.target);
+                let categoryName = element.data('name');
+
+                if (element.hasClass('btn-delete-category')) {
                     Swal.fire({
                         title: categoryName + " Kategorisini silmek istediğinize emin misiniz?",
                         showCancelButton: true,
@@ -74,23 +105,21 @@
                         cancelButtonText: "Hayır"
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            let dataID = element.getAttribute('data-id');
-                            //rotanın her zaman ne olduğunu bulabilmek için değişkene veriyorum
-                            let route ='{{ route('admin.category.destroy', ['category' => 'eyy_cat']) }}'
-                            route = route.replace('eyy_cat', dataID)
-                            deleteForm.action = route;
-                            setTimeout(deleteForm.submit(), 100);
+                            let dataID = element.data('id');
+                            // Rotanın her zaman ne olduğunu bulabilmek için değişkene veriyorum
+                            let route =
+                                '{{ route('admin.category.destroy', ['category' => 'eyy_cat']) }}';
+                            route = route.replace('eyy_cat', dataID);
+                            deleteForm.attr('action', route);
+                            setTimeout(() => {
+                                deleteForm.submit();
+                            }, 100);
                             Swal.fire("Silindi", "", "success");
                         } else if (result.isDenied) {
                             Swal.fire("Kategori silinmedi", "", "info");
                         }
                     });
-
                 }
-
-
-
-
             });
         });
     </script>
