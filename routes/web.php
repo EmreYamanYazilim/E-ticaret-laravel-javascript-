@@ -27,12 +27,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin-check'])->grou
 /* Auth işlemleri*/
 
 //throttle yaparak provider içinde registiration oluşturduğumuz limitleri verebiliriz daha fazla özelleştirme için bu yöntem  basit  olaratak  alttaki yöntemi kullanacağım
-Route::prefix('kayit-ol')->middleware('throttle:registration')->group(function () {
+Route::prefix('kayit-ol')->middleware(['throttle:registration','guest'])->group(function () {
     Route::get('/', [RegisterController::class, 'showForm'])->name("register");
     Route::post('/', [RegisterController::class, 'register']);
 });
 // throttle alternatif yöntemde throttle:60,1  dakikada 60 istek atılabiliceğini belirtir
-Route::prefix('giris')->middleware('throttle:60,60')->group(function () {
+Route::prefix('giris')->middleware(['throttle:60,60','guest'])->group(function () {
     Route::get('/', [LoginController::class, 'showForm'])->name('login');
     Route::post('/', [LoginController::class, 'login']);
 });
